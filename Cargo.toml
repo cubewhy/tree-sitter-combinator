@@ -1,0 +1,13 @@
+[package]
+name = "tree-sitter-combinator"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/cubewhy/tree-sitter-combinator"
+description = "Composable, parser-combinator-style abstraction over tree-sitter node dispatch"
+license = "MIT"
+
+[dependencies]
+tree-sitter = "0.26"
+
+[dev-dependencies]
+tree-sitter-python = "0.25"
