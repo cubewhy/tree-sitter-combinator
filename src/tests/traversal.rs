@@ -262,3 +262,47 @@ mod tests {
         assert!(!pred.test(crate::input::Input::new(root, (), None)));
     }
 }
+
+#[cfg(test)]
+mod offset_tests {
+    use crate::traversal::find_node_by_offset;
+
+    fn parse_python(src: &str) -> tree_sitter::Tree {
+        let lang: tree_sitter::Language = tree_sitter_python::LANGUAGE.into();
+        let mut parser = tree_sitter::Parser::new();
+        parser.set_language(&lang).unwrap();
+        parser.parse(src, None).unwrap()
+    }
+
+    #[test]
+    fn finds_function_containing_offset() {
+        let src = "def foo(): pass\n";
+        let tree = parse_python(src);
+        let offset = src.find("foo").unwrap();
+        let result = find_node_by_offset(tree.root_node(), "function_definition", offset);
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().kind(), "function_definition");
+    }
+
+    #[test]
+    fn returns_none_when_offset_outside_any_match() {
+        let src = "def foo(): pass\nx = 1\n";
+        let tree = parse_python(src);
+        let offset = src.find('x').unwrap();
+        let result = find_node_by_offset(tree.root_node(), "function_definition", offset);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn returns_deepest_when_nested() {
+        let src = "def outer():\n    def inner(): pass\n";
+        let tree = parse_python(src);
+        let offset = src.find("inner").unwrap();
+        let result = find_node_by_offset(tree.root_node(), "function_definition", offset);
+        assert!(result.is_some());
+        let node = result.unwrap();
+        let text = &src[node.start_byte()..node.end_byte()];
+        assert!(text.contains("inner"), "expected inner fn, got: {text}");
+        assert!(!text.contains("outer"), "should not span outer fn");
+    }
+}

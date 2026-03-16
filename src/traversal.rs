@@ -188,3 +188,49 @@ pub fn any_child_of_kinds<'tree>(node: Node<'tree>, kinds: &[&str]) -> Option<No
     node.children(&mut walker)
         .find(|child| kinds.contains(&child.kind()))
 }
+
+// ---------------------------------------------------------------------------
+// Offset-based search
+// ---------------------------------------------------------------------------
+
+/// Walk the subtree rooted at `root` and return the innermost node whose kind
+/// equals `kind` and whose byte span contains `offset`.
+///
+/// "Contains" uses inclusive-start / exclusive-end semantics
+/// (`node.start_byte() <= offset < node.end_byte()`), matching tree-sitter's
+/// own convention.
+///
+/// When multiple nodes of the target kind contain the offset (e.g. nested
+/// structures), the **deepest** one is returned — the DFS traversal keeps
+/// overwriting the result as it descends, so the last written value is the
+/// innermost match.
+///
+/// Returns `None` when no node of `kind` contains the offset.
+///
+/// # Example
+///
+/// ```rust
+/// use tree_sitter_utils::traversal::find_node_by_offset;
+/// // let method = find_node_by_offset(root, "method_declaration", cursor_offset);
+/// ```
+pub fn find_node_by_offset<'tree>(
+    root: Node<'tree>,
+    kind: &str,
+    offset: usize,
+) -> Option<Node<'tree>> {
+    fn dfs<'a>(node: Node<'a>, kind: &str, offset: usize, result: &mut Option<Node<'a>>) {
+        if offset < node.start_byte() || offset >= node.end_byte() {
+            return;
+        }
+        if node.kind() == kind {
+            *result = Some(node);
+        }
+        let mut cursor = node.walk();
+        for child in node.children(&mut cursor) {
+            dfs(child, kind, offset, result);
+        }
+    }
+    let mut result = None;
+    dfs(root, kind, offset, &mut result);
+    result
+}

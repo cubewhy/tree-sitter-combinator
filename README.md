@@ -188,6 +188,20 @@ let op = any_child_of_kinds(binary_node, &["+", "-", "*", "/"]);
 All child-search functions search **immediate children only** — they do not
 perform deep traversal.
 
+#### Offset-based search
+
+```rust
+use tree_sitter_utils::traversal::find_node_by_offset;
+
+// Walk the subtree and return the innermost node of `kind` whose byte span
+// contains `offset` (inclusive-start / exclusive-end, matching tree-sitter).
+// When multiple nodes of that kind contain the offset (nested structures)
+// the deepest one is returned.
+let method = find_node_by_offset(root, "method_declaration", cursor_offset);
+```
+
+Returns `None` when no node of `kind` contains the offset.
+
 ### Traversal vs. `.find_ancestor` combinator
 
 `traversal::ancestor_of_kind` and the `.find_ancestor` combinator solve
@@ -207,6 +221,62 @@ let h = handler_fn(|inp: Input<()>| inp.node.kind().to_owned())
     .find_ancestor(&["method_declaration"], &["program"]);
 // h.handle(input) finds the ancestor and passes it to the handler in one step.
 ```
+
+---
+
+## Query utilities
+
+The `tree_sitter_utils::query` module wraps tree-sitter's
+[`Query`](https://docs.rs/tree-sitter/latest/tree_sitter/struct.Query.html) /
+[`QueryCursor`](https://docs.rs/tree-sitter/latest/tree_sitter/struct.QueryCursor.html)
+API into two focused helpers that eliminate the streaming-iterator boilerplate
+that every consumer crate otherwise duplicates.
+
+### `run_query`
+
+Execute a compiled query against a subtree and collect every match as a
+`Vec<(capture_index, Node)>`.
+
+```rust
+use tree_sitter::{Query, Language};
+use tree_sitter_utils::query::run_query;
+
+# fn example(root: tree_sitter::Node, source: &[u8], lang: Language) {
+let q = Query::new(&lang, "(identifier) @id").unwrap();
+
+// Search the whole subtree.
+let all_matches = run_query(&q, root, source, None);
+
+// Restrict to a byte range (e.g. everything before the cursor).
+let before_cursor = run_query(&q, root, source, Some(0..cursor_offset));
+# }
+```
+
+Each element of the returned `Vec` is one match; within a match, captures
+are `(capture_index, Node)` pairs in query-pattern order.
+
+### `capture_text`
+
+Extract the source text of one capture by its index from a single match.
+
+```rust
+use tree_sitter_utils::query::{run_query, capture_text};
+use tree_sitter::{Query, Language};
+
+# fn example(root: tree_sitter::Node, source: &[u8], lang: Language) {
+let q = Query::new(&lang, "(identifier) @name").unwrap();
+let name_idx = q.capture_index_for_name("name").unwrap();
+
+for caps in run_query(&q, root, source, None) {
+    if let Some(text) = capture_text(&caps, name_idx, source) {
+        println!("{text}");
+    }
+}
+# }
+```
+
+Returns `None` when the capture index is absent from the match or when the
+node's bytes are not valid UTF-8.
 
 ## Combinator reference
 
