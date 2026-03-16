@@ -25,6 +25,7 @@ pub mod handler;
 pub mod predicates;
 pub mod combinators;
 pub mod constructors;
+pub mod traversal;
 
 #[cfg(test)]
 mod tests;
