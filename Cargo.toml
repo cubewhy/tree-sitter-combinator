@@ -1,8 +1,8 @@
 [package]
-name = "tree-sitter-combinator"
+name = "tree-sitter-utils"
 version = "0.1.1"
 edition = "2024"
-repository = "https://github.com/cubewhy/tree-sitter-combinator"
+repository = "https://github.com/cubewhy/tree-sitter-utils"
 description = "Composable, parser-combinator-style abstraction over tree-sitter node dispatch"
 license = "MIT"
 

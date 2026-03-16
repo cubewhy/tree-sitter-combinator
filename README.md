@@ -1,4 +1,4 @@
-# tree-sitter-combinator
+# tree-sitter-utils
 
 A composable, parser-combinator-style abstraction over tree-sitter node
 dispatch. Instead of writing ad-hoc `loop { match node.kind() { ... } }`
@@ -15,7 +15,7 @@ Add the dependency:
 
 ```toml
 [dependencies]
-tree-sitter-combinator = "0.1"
+tree-sitter-utils = "0.1"
 tree-sitter = "0.26"
 # plus your grammar crate, e.g. tree-sitter-python = "0.25"
 ```
@@ -66,7 +66,7 @@ fn make_labeller<'a>() -> impl tree_sitter_combinator::Handler<&'a MyCtx<'a>, St
 The original motivation was eliminating patterns like:
 
 ```java
-// Java consumer crate (NOT part of tree-sitter-combinator)
+// Java consumer crate (NOT part of tree-sitter-utils)
 private String determineLocation(Node node, Context ctx) {
     while (node != null) {
         switch (node.getType()) {
@@ -83,10 +83,10 @@ private String determineLocation(Node node, Context ctx) {
 }
 ```
 
-With `tree-sitter-combinator` the same logic in the Java consumer crate collapses to:
+With `tree-sitter-utils` the same logic in the Java consumer crate collapses to:
 
 ```rust
-// Java consumer crate — grammar strings stay here, NOT in tree-sitter-combinator.
+// Java consumer crate — grammar strings stay here, NOT in tree-sitter-utils.
 use tree_sitter_combinator::{handler_fn, never, HandlerExt, Input};
 
 fn make_location_handler() -> impl tree_sitter_combinator::Handler<MyJavaCtx, String> {

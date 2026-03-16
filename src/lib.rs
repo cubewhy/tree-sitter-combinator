@@ -1,4 +1,4 @@
-//! # tree-sitter-combinator
+//! # tree-sitter-utils
 //!
 //! A composable, parser-combinator-style abstraction over tree-sitter node
 //! dispatch. Instead of writing ad-hoc `match node.kind() { ... }` loops,
