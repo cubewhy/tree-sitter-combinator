@@ -11,7 +11,7 @@
 /// ```rust
 /// // Input<()> uses the unit type as a zero-sized context.
 /// // In real usage Ctx is typically a shared reference to your extractor.
-/// use tree_sitter_combinator::Input;
+/// use tree_sitter_utils::Input;
 /// fn accepts_input(_: Input<()>) {}
 /// ```
 #[derive(Clone, Copy)]
@@ -32,7 +32,7 @@ impl<'tree, Ctx> Input<'tree, Ctx> {
     ///
     /// ```rust
     /// # /* doc-test is compile-only; we cannot build a real Node here */
-    /// use tree_sitter_combinator::Input;
+    /// use tree_sitter_utils::Input;
     /// // Input::new(node, ctx, None)
     /// ```
     #[inline]
@@ -48,7 +48,7 @@ impl<'tree, Ctx> Input<'tree, Ctx> {
     ///
     /// ```rust
     /// # /* compile-only */
-    /// use tree_sitter_combinator::Input;
+    /// use tree_sitter_utils::Input;
     /// // let parent_input = input.with_node(parent_node);
     /// ```
     #[inline]

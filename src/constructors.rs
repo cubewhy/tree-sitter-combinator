@@ -14,7 +14,7 @@ use crate::input::Input;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, Handler, Input};
+/// use tree_sitter_utils::{handler_fn, Handler, Input};
 ///
 /// let h = handler_fn(|input: Input<()>| input.node.kind().to_owned());
 /// let _ = h;
@@ -31,7 +31,7 @@ where
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, Input};
+/// use tree_sitter_utils::{handler_fn, Input};
 /// let h = handler_fn(|_: Input<()>| 42u32);
 /// let _ = h;
 /// ```
@@ -57,7 +57,7 @@ where
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{never, HandlerExt, handler_fn, Input};
+/// use tree_sitter_utils::{never, HandlerExt, handler_fn, Input};
 ///
 /// let h = never::<(), String>()
 ///     .or(handler_fn(|_: Input<()>| "fallback".to_owned()));
@@ -72,7 +72,7 @@ pub fn never<Ctx, R>() -> Never<Ctx, R> {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::never;
+/// use tree_sitter_utils::never;
 /// let h = never::<(), u32>();
 /// let _ = h;
 /// ```
@@ -90,7 +90,7 @@ impl<Ctx, R> Handler<Ctx, R> for Never<Ctx, R> {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::always;
+/// use tree_sitter_utils::always;
 /// let h = always::<(), _>("hello".to_owned());
 /// let _ = h;
 /// ```
@@ -103,7 +103,7 @@ pub fn always<Ctx, R: Clone + Send + Sync>(value: R) -> Always<R> {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::always;
+/// use tree_sitter_utils::always;
 /// let h = always::<(), u32>(42);
 /// let _ = h;
 /// ```
@@ -115,7 +115,7 @@ impl<R> Always<R> {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::constructors::Always;
+    /// use tree_sitter_utils::constructors::Always;
     /// static H: Always<u32> = Always::new_const(42u32);
     /// ```
     pub const fn new_const(value: R) -> Self {
@@ -141,7 +141,7 @@ impl<Ctx, R: Clone + Send + Sync> Handler<Ctx, R> for Always<R> {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::dispatch_on_kind;
+/// use tree_sitter_utils::dispatch_on_kind;
 /// // let h = dispatch_on_kind(&[("identifier", &my_handler)]);
 /// let _ = dispatch_on_kind::<(), u32>(&[]);
 /// ```
@@ -156,7 +156,7 @@ pub fn dispatch_on_kind<Ctx: 'static, R: 'static>(
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::dispatch_on_kind;
+/// use tree_sitter_utils::dispatch_on_kind;
 /// let h = dispatch_on_kind::<(), u32>(&[]);
 /// let _ = h;
 /// ```
@@ -190,7 +190,7 @@ where
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{first_of, always, never, BoxedHandler, HandlerExt};
+/// use tree_sitter_utils::{first_of, always, never, BoxedHandler, HandlerExt};
 ///
 /// let handlers: Vec<BoxedHandler<(), u32>> = vec![
 ///     never::<(), u32>().boxed(),
@@ -210,7 +210,7 @@ pub fn first_of<Ctx, R>(
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::first_of;
+/// use tree_sitter_utils::first_of;
 /// let h = first_of::<(), u32>(vec![]);
 /// let _ = h;
 /// ```

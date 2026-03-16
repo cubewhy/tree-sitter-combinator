@@ -13,11 +13,11 @@ use crate::input::Input;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{NodePredicate, kind_is};
+/// use tree_sitter_utils::{NodePredicate, kind_is};
 ///
 /// fn accepts_pred<Ctx: Copy, P: NodePredicate<Ctx>>(_: P) {}
 /// accepts_pred::<(), _>(kind_is(&["identifier"]));
-/// accepts_pred::<(), _>(|input: tree_sitter_combinator::Input<()>| input.node.kind() == "identifier");
+/// accepts_pred::<(), _>(|input: tree_sitter_utils::Input<()>| input.node.kind() == "identifier");
 /// ```
 pub trait NodePredicate<Ctx>: Send + Sync {
     /// Test whether the predicate holds for the given input.
@@ -44,7 +44,7 @@ where
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::kind_is;
+/// use tree_sitter_utils::kind_is;
 /// let pred = kind_is(&["identifier", "type_identifier"]);
 /// let _ = pred;
 /// ```
@@ -63,7 +63,7 @@ impl<Ctx> NodePredicate<Ctx> for KindIs {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::kind_is_not;
+/// use tree_sitter_utils::kind_is_not;
 /// let pred = kind_is_not(&["comment", "ERROR"]);
 /// let _ = pred;
 /// ```
@@ -82,7 +82,7 @@ impl<Ctx> NodePredicate<Ctx> for KindIsNot {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::has_parent_kind;
+/// use tree_sitter_utils::has_parent_kind;
 /// let pred = has_parent_kind("function_definition");
 /// let _ = pred;
 /// ```
@@ -101,7 +101,7 @@ impl<Ctx> NodePredicate<Ctx> for HasParentKind {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::node_depth_lte;
+/// use tree_sitter_utils::node_depth_lte;
 /// let pred = node_depth_lte(3);
 /// let _ = pred;
 /// ```
@@ -133,7 +133,7 @@ impl<Ctx> NodePredicate<Ctx> for NodeDepthLte {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::kind_is;
+/// use tree_sitter_utils::kind_is;
 /// let _ = kind_is(&["identifier"]);
 /// ```
 #[inline]
@@ -146,7 +146,7 @@ pub fn kind_is(kinds: &'static [&'static str]) -> KindIs {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::kind_is_not;
+/// use tree_sitter_utils::kind_is_not;
 /// let _ = kind_is_not(&["comment", "ERROR"]);
 /// ```
 #[inline]
@@ -159,7 +159,7 @@ pub fn kind_is_not(kinds: &'static [&'static str]) -> KindIsNot {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::has_parent_kind;
+/// use tree_sitter_utils::has_parent_kind;
 /// let _ = has_parent_kind("call_expression");
 /// ```
 #[inline]
@@ -172,7 +172,7 @@ pub fn has_parent_kind(kind: &'static str) -> HasParentKind {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::node_depth_lte;
+/// use tree_sitter_utils::node_depth_lte;
 /// let _ = node_depth_lte(5);
 /// ```
 #[inline]
@@ -193,7 +193,7 @@ pub fn node_depth_lte(max: usize) -> NodeDepthLte {
 /// utility. Use it to write guards such as:
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, has_ancestor_kind, Input};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, has_ancestor_kind, Input};
 ///
 /// // Only fire when the node lives somewhere inside an `argument_list`.
 /// let h = handler_fn(|_: Input<()>| "inside arg list".to_owned())
@@ -225,7 +225,7 @@ impl<Ctx> NodePredicate<Ctx> for HasAncestorKind {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::has_ancestor_kind;
+/// use tree_sitter_utils::has_ancestor_kind;
 /// let _ = has_ancestor_kind("lambda_expression");
 /// ```
 #[inline]

@@ -10,10 +10,10 @@ use crate::input::Input;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, never};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, never};
 ///
 /// let h = never::<(), String>()
-///     .or(handler_fn(|_: tree_sitter_combinator::Input<()>| "fallback".to_owned()));
+///     .or(handler_fn(|_: tree_sitter_utils::Input<()>| "fallback".to_owned()));
 /// let _ = h;
 /// ```
 pub struct Or<A, B> {

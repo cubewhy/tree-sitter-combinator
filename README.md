@@ -23,7 +23,7 @@ tree-sitter = "0.26"
 Build a handler chain for a fictional language with four node kinds:
 
 ```rust
-use tree_sitter_combinator::{handler_fn, never, HandlerExt, Input};
+use tree_sitter_utils::{handler_fn, never, HandlerExt, Input};
 
 // Context your consumer crate supplies to every handler.
 struct MyCtx<'a> {
@@ -31,7 +31,7 @@ struct MyCtx<'a> {
 }
 
 // Label nodes from a fictional grammar.
-fn make_labeller<'a>() -> impl tree_sitter_combinator::Handler<&'a MyCtx<'a>, String> {
+fn make_labeller<'a>() -> impl tree_sitter_utils::Handler<&'a MyCtx<'a>, String> {
     // 1. Handle "func_decl" and "lambda" the same way.
     let callable = handler_fn(|_: Input<&MyCtx<'_>>| "callable".to_owned())
         .for_kinds(&["func_decl", "lambda"]);
@@ -41,7 +41,7 @@ fn make_labeller<'a>() -> impl tree_sitter_combinator::Handler<&'a MyCtx<'a>, St
         format!("ident-in-call:{}", inp.node.kind())
     })
     .for_kinds(&["identifier"])
-    .when(tree_sitter_combinator::has_parent_kind("call_expr"));
+    .when(tree_sitter_utils::has_parent_kind("call_expr"));
 
     // 3. Climb to the nearest enclosing "block" for anything else.
     let block_climber = (|inp: Input<&MyCtx<'_>>| -> Option<String> {
@@ -87,9 +87,9 @@ With `tree-sitter-utils` the same logic in the Java consumer crate collapses to:
 
 ```rust
 // Java consumer crate — grammar strings stay here, NOT in tree-sitter-utils.
-use tree_sitter_combinator::{handler_fn, never, HandlerExt, Input};
+use tree_sitter_utils::{handler_fn, never, HandlerExt, Input};
 
-fn make_location_handler() -> impl tree_sitter_combinator::Handler<MyJavaCtx, String> {
+fn make_location_handler() -> impl tree_sitter_utils::Handler<MyJavaCtx, String> {
     handler_fn(|inp: Input<MyJavaCtx>| label_method(&inp.node, &inp.ctx))
         .for_kinds(&["method_declaration"])
         .or(

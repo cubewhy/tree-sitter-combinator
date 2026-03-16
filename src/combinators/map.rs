@@ -11,9 +11,9 @@ use std::marker::PhantomData;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt};
+/// use tree_sitter_utils::{handler_fn, HandlerExt};
 ///
-/// let h = handler_fn(|_: tree_sitter_combinator::Input<()>| 42u32)
+/// let h = handler_fn(|_: tree_sitter_utils::Input<()>| 42u32)
 ///     .map(|n| n.to_string());
 /// let _ = h;
 /// ```

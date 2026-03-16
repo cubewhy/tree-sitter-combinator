@@ -18,7 +18,7 @@ type BoxFn<Ctx, R> =
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, BoxedHandler, Input};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, BoxedHandler, Input};
 ///
 /// let h: BoxedHandler<(), String> =
 ///     handler_fn(|_: Input<()>| "hello".to_owned()).boxed();

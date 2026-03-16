@@ -12,7 +12,7 @@ use std::marker::PhantomData;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
 ///
 /// let h = handler_fn(|_: Input<()>| 42u32)
 ///     .and_then(|_input: Input<()>, n: u32| if n > 0 { Some(n.to_string()) } else { None });

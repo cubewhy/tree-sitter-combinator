@@ -34,7 +34,7 @@ use self::when::When;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, Input, never};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, Input, never};
 ///
 /// let h = never::<(), u32>()
 ///     .or(handler_fn(|_: Input<()>| 42u32))
@@ -47,7 +47,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{never, handler_fn, HandlerExt, Input};
+    /// use tree_sitter_utils::{never, handler_fn, HandlerExt, Input};
     ///
     /// let h = never::<(), String>()
     ///     .or(handler_fn(|_: Input<()>| "fallback".to_owned()));
@@ -62,7 +62,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{handler_fn, HandlerExt, kind_is, Input};
+    /// use tree_sitter_utils::{handler_fn, HandlerExt, kind_is, Input};
     ///
     /// let h = handler_fn(|_: Input<()>| "hit".to_owned())
     ///     .when(kind_is(&["identifier"]));
@@ -77,7 +77,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+    /// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
     ///
     /// let h = handler_fn(|_: Input<()>| "ident".to_owned())
     ///     .for_kinds(&["identifier", "type_identifier"]);
@@ -92,7 +92,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+    /// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
     ///
     /// let h = handler_fn(|_: Input<()>| 1u32).map(|n| n.to_string());
     /// let _ = h;
@@ -109,7 +109,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+    /// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
     ///
     /// let h = handler_fn(|input: Input<()>| input.node.kind().to_owned())
     ///     .map_input(|mut i: Input<()>| { i.trigger_char = Some('.'); i });
@@ -127,7 +127,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+    /// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
     ///
     /// let h = handler_fn(|_: Input<()>| 1u32)
     ///     .and_then(|_: Input<()>, n: u32| Some(n + 1));
@@ -146,7 +146,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+    /// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
     ///
     /// let h = handler_fn(|input: Input<()>| {
     ///     (input.node.kind() == "module").then(|| "module".to_owned())
@@ -163,11 +163,11 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{never, HandlerExt, Input};
+    /// use tree_sitter_utils::{never, HandlerExt, Input};
     ///
     /// let h = never::<(), String>()
     ///     .or_else_climb(
-    ///         |input: tree_sitter_combinator::Input<()>| -> Option<String> {
+    ///         |input: tree_sitter_utils::Input<()>| -> Option<String> {
     ///             Some(input.node.kind().to_owned())
     ///         },
     ///         &["source_file"],
@@ -189,7 +189,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+    /// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
     ///
     /// let h = handler_fn(|inp: Input<()>| inp.node.kind().to_owned())
     ///     .find_ancestor(&["argument_list"], &["program"]);
@@ -205,7 +205,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+    /// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
     ///
     /// let h = handler_fn(|inp: Input<()>| inp.node.kind().to_owned())
     ///     .for_children();
@@ -221,7 +221,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{Input, HandlerExt};
+    /// use tree_sitter_utils::{Input, HandlerExt};
     ///
     /// let h = (|inp: Input<()>| -> Option<String> {
     ///     (inp.node.kind() == "identifier").then(|| inp.node.kind().to_owned())
@@ -238,7 +238,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     /// # Example
     ///
     /// ```rust
-    /// use tree_sitter_combinator::{handler_fn, HandlerExt, BoxedHandler, Input};
+    /// use tree_sitter_utils::{handler_fn, HandlerExt, BoxedHandler, Input};
     ///
     /// let h: BoxedHandler<(), String> =
     ///     handler_fn(|_: Input<()>| "hi".to_owned()).boxed();

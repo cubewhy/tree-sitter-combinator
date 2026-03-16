@@ -15,10 +15,10 @@ use crate::input::Input;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
 ///
 /// // Climbs until it finds a node whose kind is "module" or hits the root.
-/// let h = (|input: tree_sitter_combinator::Input<()>| -> Option<String> {
+/// let h = (|input: tree_sitter_utils::Input<()>| -> Option<String> {
 ///     (input.node.kind() == "module").then(|| "found module".to_owned())
 /// })
 /// .climb(&["source_file"]);
@@ -64,11 +64,11 @@ where
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{never, HandlerExt, Input};
+/// use tree_sitter_utils::{never, HandlerExt, Input};
 ///
 /// let leaf = never::<(), String>();
 /// let h = leaf.or_else_climb(
-///     |inp: tree_sitter_combinator::Input<()>| -> Option<String> {
+///     |inp: tree_sitter_utils::Input<()>| -> Option<String> {
 ///         (inp.node.kind() == "module").then(|| "module".to_owned())
 ///     },
 ///     &["source_file"],

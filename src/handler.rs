@@ -18,7 +18,7 @@ pub type HandlerResult<R> = Option<R>;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{Handler, Input, HandlerResult};
+/// use tree_sitter_utils::{Handler, Input, HandlerResult};
 ///
 /// struct MyHandler;
 ///
@@ -40,7 +40,7 @@ pub trait Handler<Ctx, R>: Send + Sync {
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{Handler, Input};
+/// use tree_sitter_utils::{Handler, Input};
 ///
 /// fn use_handler<H: Handler<(), String>>(h: &H) { let _ = h; }
 ///

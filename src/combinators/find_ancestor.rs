@@ -35,7 +35,7 @@ use crate::input::Input;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
 ///
 /// // Walk up to the nearest "argument_list" and return its kind.
 /// let h = handler_fn(|inp: Input<()>| inp.node.kind().to_owned())

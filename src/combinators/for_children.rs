@@ -37,7 +37,7 @@ use crate::input::Input;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
 ///
 /// // Collect the kind-string of every named child.
 /// let h = handler_fn(|inp: Input<()>| inp.node.kind().to_owned())
@@ -81,7 +81,7 @@ where
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, Input};
 ///
 /// // Return the kind of the first named child that is an "identifier".
 /// let h = (|inp: Input<()>| -> Option<String> {

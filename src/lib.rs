@@ -11,7 +11,7 @@
 //! ## Quick example
 //!
 //! ```rust
-//! use tree_sitter_combinator::{Input, handler_fn, HandlerExt};
+//! use tree_sitter_utils::{Input, handler_fn, HandlerExt};
 //!
 //! // A minimal handler that labels identifier nodes.
 //! let h = handler_fn(|input: Input<()>| format!("node:{}", input.node.kind()))

@@ -12,9 +12,9 @@ use crate::predicates::NodePredicate;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, kind_is};
+/// use tree_sitter_utils::{handler_fn, HandlerExt, kind_is};
 ///
-/// let h = handler_fn(|_: tree_sitter_combinator::Input<()>| "hit".to_owned())
+/// let h = handler_fn(|_: tree_sitter_utils::Input<()>| "hit".to_owned())
 ///     .when(kind_is(&["identifier"]));
 /// let _ = h;
 /// ```

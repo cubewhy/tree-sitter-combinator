@@ -31,7 +31,7 @@ use tree_sitter::Node;
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::traversal::ancestor_of_kind;
+/// use tree_sitter_utils::traversal::ancestor_of_kind;
 /// // let method = ancestor_of_kind(identifier_node, "method_declaration");
 /// ```
 pub fn ancestor_of_kind<'tree>(mut node: Node<'tree>, kind: &str) -> Option<Node<'tree>> {
@@ -55,7 +55,7 @@ pub fn ancestor_of_kind<'tree>(mut node: Node<'tree>, kind: &str) -> Option<Node
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::traversal::ancestor_of_kinds;
+/// use tree_sitter_utils::traversal::ancestor_of_kinds;
 /// // let stmt = ancestor_of_kinds(node, &["break_statement", "continue_statement"]);
 /// ```
 pub fn ancestor_of_kinds<'tree>(
@@ -88,7 +88,7 @@ pub fn ancestor_of_kinds<'tree>(
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::traversal::peel_while_kind;
+/// use tree_sitter_utils::traversal::peel_while_kind;
 /// // Unwrap ((x + 1)) to reach the binary_expression node.
 /// // let inner = peel_while_kind(node, &["parenthesized_expression"]);
 /// ```
@@ -121,7 +121,7 @@ pub fn peel_while_kind<'tree>(mut node: Node<'tree>, wrapper_kinds: &[&str]) -> 
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::traversal::first_child_of_kind;
+/// use tree_sitter_utils::traversal::first_child_of_kind;
 /// // let name_node = first_child_of_kind(decl_node, "identifier");
 /// ```
 pub fn first_child_of_kind<'tree>(node: Node<'tree>, kind: &str) -> Option<Node<'tree>> {
@@ -143,7 +143,7 @@ pub fn first_child_of_kind<'tree>(node: Node<'tree>, kind: &str) -> Option<Node<
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::traversal::first_child_of_kinds;
+/// use tree_sitter_utils::traversal::first_child_of_kinds;
 /// // let param = first_child_of_kinds(node, &["formal_parameter", "spread_parameter"]);
 /// ```
 pub fn first_child_of_kinds<'tree>(node: Node<'tree>, kinds: &[&str]) -> Option<Node<'tree>> {
@@ -162,7 +162,7 @@ pub fn first_child_of_kinds<'tree>(node: Node<'tree>, kinds: &[&str]) -> Option<
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::traversal::any_child_of_kind;
+/// use tree_sitter_utils::traversal::any_child_of_kind;
 /// // Find the anonymous `new` keyword inside an object_creation_expression.
 /// // let new_tok = any_child_of_kind(ctor_node, "new");
 /// ```
@@ -180,7 +180,7 @@ pub fn any_child_of_kind<'tree>(node: Node<'tree>, kind: &str) -> Option<Node<'t
 /// # Example
 ///
 /// ```rust
-/// use tree_sitter_combinator::traversal::any_child_of_kinds;
+/// use tree_sitter_utils::traversal::any_child_of_kinds;
 /// // let op = any_child_of_kinds(binary_node, &["+", "-", "*", "/"]);
 /// ```
 pub fn any_child_of_kinds<'tree>(node: Node<'tree>, kinds: &[&str]) -> Option<Node<'tree>> {
