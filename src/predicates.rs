@@ -192,3 +192,60 @@ pub fn has_parent_kind(kind: &'static str) -> HasParentKind {
 pub fn node_depth_lte(max: usize) -> NodeDepthLte {
     NodeDepthLte(max)
 }
+
+/// Predicate: `true` when **any strict ancestor** of the node has the given
+/// `kind`.
+///
+/// Unlike [`HasParentKind`], which only inspects the immediate parent, this
+/// predicate walks the full ancestry chain from the node up to the root and
+/// returns `true` as soon as it finds a node whose kind matches.
+///
+/// The node itself is **not** tested — only its strict ancestors.
+///
+/// This is the predicate counterpart of the java parser's `find_ancestor`
+/// utility. Use it to write guards such as:
+///
+/// ```rust
+/// use tree_sitter_combinator::{handler_fn, HandlerExt, has_ancestor_kind, Input};
+///
+/// // Only fire when the node lives somewhere inside an `argument_list`.
+/// let h = handler_fn(|_: Input<()>| "inside arg list".to_owned())
+///     .when(has_ancestor_kind("argument_list"));
+/// let _ = h;
+/// ```
+#[derive(Clone, Copy, Debug)]
+pub struct HasAncestorKind(pub &'static str);
+
+impl<Ctx> NodePredicate<Ctx> for HasAncestorKind {
+    #[inline]
+    fn test(&self, input: Input<'_, Ctx>) -> bool {
+        let mut current = input.node.parent();
+        while let Some(ancestor) = current {
+            if ancestor.kind() == self.0 {
+                return true;
+            }
+            current = ancestor.parent();
+        }
+        false
+    }
+}
+
+// SAFETY: `&'static str` is `Send + Sync`; no interior mutability.
+unsafe impl Send for HasAncestorKind {}
+unsafe impl Sync for HasAncestorKind {}
+
+/// Returns a predicate that is `true` when **any strict ancestor** of the
+/// node has the given `kind`.
+///
+/// See [`HasAncestorKind`] for the full semantics.
+///
+/// # Example
+///
+/// ```rust
+/// use tree_sitter_combinator::has_ancestor_kind;
+/// let _ = has_ancestor_kind("lambda_expression");
+/// ```
+#[inline]
+pub fn has_ancestor_kind(kind: &'static str) -> HasAncestorKind {
+    HasAncestorKind(kind)
+}

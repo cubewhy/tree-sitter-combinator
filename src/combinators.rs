@@ -5,6 +5,8 @@
 pub mod and_then;
 pub mod boxed;
 pub mod climb;
+pub mod find_ancestor;
+pub mod for_children;
 pub mod map;
 pub mod or;
 pub mod when;
@@ -18,14 +20,16 @@ use crate::predicates::{kind_is, KindIs, NodePredicate};
 use self::and_then::AndThen;
 use self::boxed::BoxedHandler;
 use self::climb::{Climb, OrElseClimb};
+use self::find_ancestor::FindAncestor;
+use self::for_children::{ForChildren, ScanChildren};
 use self::map::Map;
 use self::or::Or;
 use self::when::When;
 
 /// Extension trait that adds combinator methods to every [`Handler`].
 ///
-/// This trait has a blanket implementation for all `T: Handler<Ctx, R>` and
-/// is not intended to be used as a trait object.
+/// Blanket-implemented for all `T: Handler<Ctx, R>`; not intended as a trait
+/// object.
 ///
 /// # Example
 ///
@@ -68,7 +72,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
         When { inner: self, pred }
     }
 
-    /// Sugar for `.when(kind_is(kinds))` — only handle specific node kinds.
+    /// Sugar for `.when(kind_is(kinds))` - only handle specific node kinds.
     ///
     /// # Example
     ///
@@ -137,7 +141,7 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     }
 
     /// Retry `self` on each ancestor until it succeeds, stopping at any kind
-    /// in `stop_kinds` or at the tree root.
+    /// in `stop_kinds` or at the root.
     ///
     /// # Example
     ///
@@ -170,12 +174,63 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     ///     );
     /// let _ = h;
     /// ```
-    fn or_else_climb<O: Handler<Ctx, R>>(
-        self,
-        other: O,
-        stop_kinds: &'static [&'static str],
-    ) -> OrElseClimb<Self, O> {
+    fn or_else_climb<O: Handler<Ctx, R>>(self, other: O, stop_kinds: &'static [&'static str]) -> OrElseClimb<Self, O> {
         OrElseClimb { inner: self, other, stop_kinds }
+    }
+
+    /// Walk up to the nearest strict ancestor in `target_kinds`, then run
+    /// `self` on **that ancestor node** once.
+    ///
+    /// Unlike [`HandlerExt::climb`], which retries `self` on every ancestor,
+    /// `find_ancestor` locates a specific kind first and invokes `self` once.
+    ///
+    /// Stops (`None`) when a `stop_kinds` node or the root is reached.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+    ///
+    /// let h = handler_fn(|inp: Input<()>| inp.node.kind().to_owned())
+    ///     .find_ancestor(&["argument_list"], &["program"]);
+    /// let _ = h;
+    /// ```
+    fn find_ancestor(self, target_kinds: &'static [&'static str], stop_kinds: &'static [&'static str]) -> FindAncestor<Self> {
+        FindAncestor { inner: self, target_kinds, stop_kinds }
+    }
+
+    /// Apply `self` to every **named child**, collect all `Some(r)` into a
+    /// `Vec<R>`, and return `Some(vec)` (never `None`).
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
+    ///
+    /// let h = handler_fn(|inp: Input<()>| inp.node.kind().to_owned())
+    ///     .for_children();
+    /// let _ = h;
+    /// ```
+    fn for_children(self) -> ForChildren<Self> {
+        ForChildren { inner: self }
+    }
+
+    /// Apply `self` to each **named child** in order; return the first
+    /// `Some(r)`, or `None` if no child matches.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use tree_sitter_combinator::{Input, HandlerExt};
+    ///
+    /// let h = (|inp: Input<()>| -> Option<String> {
+    ///     (inp.node.kind() == "identifier").then(|| inp.node.kind().to_owned())
+    /// })
+    /// .scan_children();
+    /// let _ = h;
+    /// ```
+    fn scan_children(self) -> ScanChildren<Self> {
+        ScanChildren { inner: self }
     }
 
     /// Erase the concrete type into a [`BoxedHandler`] for dynamic dispatch.
@@ -198,30 +253,10 @@ pub trait HandlerExt<Ctx, R>: Handler<Ctx, R> + Sized {
     }
 }
 
-/// Blanket implementation — every `Handler` gets all combinator methods.
 impl<Ctx, R, T: Handler<Ctx, R>> HandlerExt<Ctx, R> for T {}
 
-// ---------------------------------------------------------------------------
-// MapInput combinator
-// ---------------------------------------------------------------------------
-
-/// A handler that transforms the [`Input`] before passing it to `inner`.
-///
-/// Constructed via [`HandlerExt::map_input`].
-///
-/// # Example
-///
-/// ```rust
-/// use tree_sitter_combinator::{handler_fn, HandlerExt, Input};
-///
-/// let h = handler_fn(|input: Input<()>| input.node.kind().to_owned())
-///     .map_input(|mut i: Input<()>| { i.trigger_char = Some('.'); i });
-/// let _ = h;
-/// ```
 pub struct MapInput<H, F> {
-    /// The inner handler.
     pub inner: H,
-    /// The input-transformation function.
     pub f: F,
 }
 
