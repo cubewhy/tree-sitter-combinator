@@ -34,6 +34,7 @@ pub use input::Input;
 pub use handler::{Handler, HandlerResult};
 pub use predicates::{NodePredicate, kind_is, kind_is_not, has_parent_kind, node_depth_lte};
 pub use predicates::{has_ancestor_kind, HasAncestorKind};
+pub use predicates::{has_ancestor_kinds, HasAncestorKinds};
 pub use combinators::HandlerExt;
 pub use combinators::boxed::BoxedHandler;
 pub use combinators::find_ancestor::FindAncestor;

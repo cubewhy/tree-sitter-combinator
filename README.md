@@ -112,6 +112,102 @@ path), and called with a single `handler.handle(input)` per node.
 
 ---
 
+
+## Traversal utilities
+
+The `tree_sitter_utils::traversal` module provides a set of pure,
+node-returning helpers for locating nodes in the syntax tree without going
+through the combinator machinery. Use them when you need a `Node` value back
+directly rather than a dispatched output.
+
+### When to use traversal vs. combinators
+
+| Goal | Tool |
+|---|---|
+| Find the nearest ancestor of a specific kind and use it as a `Node` | `traversal::ancestor_of_kind` / `ancestor_of_kinds` |
+| Find the nearest ancestor of a specific kind, then run a handler on it | `.find_ancestor(kinds, stop)` combinator |
+| Check whether **any** ancestor has a specific kind (as a predicate) | `has_ancestor_kind` / `has_ancestor_kinds` |
+| Unwrap wrapper nodes to reach the inner expression | `traversal::peel_while_kind` |
+| Find the first named child of a specific kind | `traversal::first_child_of_kind` / `first_child_of_kinds` |
+| Find the first child (including anonymous tokens) of a specific kind | `traversal::any_child_of_kind` / `any_child_of_kinds` |
+| Dispatch on node kind and produce a value | combinator chain (`handler_fn`, `.for_kinds`, `.or`, …) |
+
+### Function reference
+
+#### Ancestor traversal
+
+```rust
+use tree_sitter_utils::traversal::{ancestor_of_kind, ancestor_of_kinds};
+
+// Walk up the tree and return the first strict ancestor whose kind matches.
+// The starting node itself is never tested.
+let method = ancestor_of_kind(identifier_node, "method_declaration");
+
+// Multi-kind variant: return the first ancestor that matches any of the kinds.
+let stmt = ancestor_of_kinds(node, &["break_statement", "continue_statement"]);
+```
+
+Both functions return `None` when the root is reached without a match.
+
+#### Wrapper peeling
+
+```rust
+use tree_sitter_utils::traversal::peel_while_kind;
+
+// Repeatedly descend into the first named child while the node kind is a
+// wrapper kind.  Useful for stripping `parenthesized_expression` or
+// `expression_statement` wrappers to reach the real expression inside.
+let inner = peel_while_kind(node, &["parenthesized_expression"]);
+```
+
+If the node is not a wrapper kind it is returned unchanged. If a wrapper has
+no named child, descending stops and the wrapper itself is returned.
+
+#### Child search
+
+```rust
+use tree_sitter_utils::traversal::{
+    first_child_of_kind, first_child_of_kinds,
+    any_child_of_kind, any_child_of_kinds,
+};
+
+// First *named* child with a given kind (skips anonymous tokens).
+let name = first_child_of_kind(decl_node, "identifier");
+
+// First named child matching any of several kinds.
+let param = first_child_of_kinds(node, &["formal_parameter", "spread_parameter"]);
+
+// First child (named *or* anonymous) with a given kind.
+// Use this for anonymous tokens like `new`, `.`, `;`.
+let new_kw = any_child_of_kind(ctor_node, "new");
+
+// Multi-kind variant of any_child_of_kind.
+let op = any_child_of_kinds(binary_node, &["+", "-", "*", "/"]);
+```
+
+All child-search functions search **immediate children only** — they do not
+perform deep traversal.
+
+### Traversal vs. `.find_ancestor` combinator
+
+`traversal::ancestor_of_kind` and the `.find_ancestor` combinator solve
+related but different problems:
+
+```rust
+use tree_sitter_utils::{handler_fn, HandlerExt, Input};
+use tree_sitter_utils::traversal::ancestor_of_kind;
+
+// traversal::ancestor_of_kind — you want the Node itself.
+if let Some(method) = ancestor_of_kind(node, "method_declaration") {
+    // work with `method` directly
+}
+
+// .find_ancestor combinator — you want to run a handler on the found ancestor.
+let h = handler_fn(|inp: Input<()>| inp.node.kind().to_owned())
+    .find_ancestor(&["method_declaration"], &["program"]);
+// h.handle(input) finds the ancestor and passes it to the handler in one step.
+```
+
 ## Combinator reference
 
 | Combinator | Signature sketch | Semantics |

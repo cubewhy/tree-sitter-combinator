@@ -226,4 +226,39 @@ mod tests {
         assert!(result.is_some());
         assert_eq!(result.unwrap().kind(), "=");
     }
+
+    // -----------------------------------------------------------------------
+    // HasAncestorKinds predicate
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn has_ancestor_kinds_returns_true_when_any_ancestor_matches() {
+        // identifier is nested inside assignment which is inside module.
+        // Asking for ["assignment", "function_definition"] should hit assignment.
+        let tree = parse_python("x = 1\n");
+        let ident = find_node(tree.root_node(), |n| n.kind() == "identifier").unwrap();
+        let pred = crate::predicates::HasAncestorKinds(&["assignment", "function_definition"]);
+        use crate::predicates::NodePredicate;
+        assert!(pred.test(crate::input::Input::new(ident, (), None)));
+    }
+
+    #[test]
+    fn has_ancestor_kinds_returns_false_when_no_ancestor_matches() {
+        let tree = parse_python("x = 1\n");
+        let ident = find_node(tree.root_node(), |n| n.kind() == "identifier").unwrap();
+        let pred = crate::predicates::HasAncestorKinds(&["function_definition", "class_definition"]);
+        use crate::predicates::NodePredicate;
+        assert!(!pred.test(crate::input::Input::new(ident, (), None)));
+    }
+
+    #[test]
+    fn has_ancestor_kinds_does_not_match_self() {
+        // Starting from the module root, searching for "module" must return false.
+        let tree = parse_python("x = 1\n");
+        let root = tree.root_node();
+        assert_eq!(root.kind(), "module");
+        let pred = crate::predicates::HasAncestorKinds(&["module"]);
+        use crate::predicates::NodePredicate;
+        assert!(!pred.test(crate::input::Input::new(root, (), None)));
+    }
 }

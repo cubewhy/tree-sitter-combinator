@@ -232,3 +232,55 @@ impl<Ctx> NodePredicate<Ctx> for HasAncestorKind {
 pub fn has_ancestor_kind(kind: &'static str) -> HasAncestorKind {
     HasAncestorKind(kind)
 }
+
+/// Predicate: `true` when **any strict ancestor** of the node has a kind that
+/// is one of the given `kinds`.
+///
+/// This is the multi-kind variant of [`HasAncestorKind`].  It walks the full
+/// ancestry chain from the node up to the root and returns `true` as soon as
+/// it finds a node whose kind appears in `kinds`.
+///
+/// The node itself is **not** tested — only its strict ancestors.
+///
+/// # Example
+///
+/// ```rust
+/// use tree_sitter_utils::{handler_fn, HandlerExt, has_ancestor_kinds, Input};
+///
+/// // Only fire when the node is nested inside a method or constructor.
+/// let h = handler_fn(|_: Input<()>| "in method or ctor".to_owned())
+///     .when(has_ancestor_kinds(&["method_declaration", "constructor_declaration"]));
+/// let _ = h;
+/// ```
+#[derive(Clone, Copy, Debug)]
+pub struct HasAncestorKinds(pub &'static [&'static str]);
+
+impl<Ctx> NodePredicate<Ctx> for HasAncestorKinds {
+    #[inline]
+    fn test(&self, input: Input<'_, Ctx>) -> bool {
+        let mut current = input.node.parent();
+        while let Some(ancestor) = current {
+            if self.0.contains(&ancestor.kind()) {
+                return true;
+            }
+            current = ancestor.parent();
+        }
+        false
+    }
+}
+
+/// Returns a predicate that is `true` when **any strict ancestor** of the
+/// node has a kind that is one of `kinds`.
+///
+/// See [`HasAncestorKinds`] for the full semantics.
+///
+/// # Example
+///
+/// ```rust
+/// use tree_sitter_utils::has_ancestor_kinds;
+/// let _ = has_ancestor_kinds(&["method_declaration", "constructor_declaration"]);
+/// ```
+#[inline]
+pub fn has_ancestor_kinds(kinds: &'static [&'static str]) -> HasAncestorKinds {
+    HasAncestorKinds(kinds)
+}
