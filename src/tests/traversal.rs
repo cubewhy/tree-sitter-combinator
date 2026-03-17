@@ -306,3 +306,102 @@ mod offset_tests {
         assert!(!text.contains("outer"), "should not span outer fn");
     }
 }
+
+#[cfg(test)]
+mod sibling_and_descent_tests {
+    use crate::traversal::{is_descendant_of, preceding_named_sibling};
+
+    fn parse_python(src: &str) -> tree_sitter::Tree {
+        let lang: tree_sitter::Language = tree_sitter_python::LANGUAGE.into();
+        let mut parser = tree_sitter::Parser::new();
+        parser.set_language(&lang).unwrap();
+        parser.parse(src, None).unwrap()
+    }
+
+    fn find_node<'t, F: Fn(tree_sitter::Node<'_>) -> bool + Copy>(
+        node: tree_sitter::Node<'t>,
+        pred: F,
+    ) -> Option<tree_sitter::Node<'t>> {
+        if pred(node) {
+            return Some(node);
+        }
+        for i in 0..node.child_count() {
+            if let Some(child) = node.child(i as u32) {
+                if let Some(found) = find_node(child, pred) {
+                    return Some(found);
+                }
+            }
+        }
+        None
+    }
+
+    // -----------------------------------------------------------------------
+    // preceding_named_sibling
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn preceding_named_sibling_returns_none_for_first_child() {
+        // `x = 1` — identifier is the first named child of assignment.
+        let tree = parse_python("x = 1\n");
+        let assignment = find_node(tree.root_node(), |n| n.kind() == "assignment").unwrap();
+        let ident = find_node(assignment, |n| n.kind() == "identifier").unwrap();
+        assert!(preceding_named_sibling(ident, assignment).is_none());
+    }
+
+    #[test]
+    fn preceding_named_sibling_returns_previous_named_child() {
+        // `x = 1` — named children of assignment are [identifier(x), integer(1)].
+        // The preceding named sibling of integer(1) should be identifier(x).
+        let tree = parse_python("x = 1\n");
+        let assignment = find_node(tree.root_node(), |n| n.kind() == "assignment").unwrap();
+        let integer = find_node(assignment, |n| n.kind() == "integer").unwrap();
+        let result = preceding_named_sibling(integer, assignment);
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().kind(), "identifier");
+    }
+
+    #[test]
+    fn preceding_named_sibling_returns_none_when_node_not_child_of_parent() {
+        // Use a node as its own parent — it has no named children matching itself.
+        let tree = parse_python("x = 1\n");
+        let integer = find_node(tree.root_node(), |n| n.kind() == "integer").unwrap();
+        assert!(preceding_named_sibling(integer, integer).is_none());
+    }
+
+    // -----------------------------------------------------------------------
+    // is_descendant_of
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn is_descendant_of_returns_true_for_self() {
+        let tree = parse_python("x = 1\n");
+        let ident = find_node(tree.root_node(), |n| n.kind() == "identifier").unwrap();
+        assert!(is_descendant_of(ident, ident));
+    }
+
+    #[test]
+    fn is_descendant_of_returns_true_for_direct_parent() {
+        let tree = parse_python("x = 1\n");
+        let assignment = find_node(tree.root_node(), |n| n.kind() == "assignment").unwrap();
+        let ident = find_node(assignment, |n| n.kind() == "identifier").unwrap();
+        assert!(is_descendant_of(ident, assignment));
+    }
+
+    #[test]
+    fn is_descendant_of_returns_true_for_distant_ancestor() {
+        let tree = parse_python("x = 1\n");
+        let root = tree.root_node();
+        let ident = find_node(root, |n| n.kind() == "identifier").unwrap();
+        assert!(is_descendant_of(ident, root));
+    }
+
+    #[test]
+    fn is_descendant_of_returns_false_for_unrelated_node() {
+        let tree = parse_python("x = 1\n");
+        let assignment = find_node(tree.root_node(), |n| n.kind() == "assignment").unwrap();
+        let integer = find_node(assignment, |n| n.kind() == "integer").unwrap();
+        let ident = find_node(assignment, |n| n.kind() == "identifier").unwrap();
+        // integer is a sibling of identifier, not a descendant
+        assert!(!is_descendant_of(integer, ident));
+    }
+}

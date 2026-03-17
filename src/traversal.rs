@@ -193,6 +193,74 @@ pub fn any_child_of_kinds<'tree>(node: Node<'tree>, kinds: &[&str]) -> Option<No
 // Offset-based search
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Sibling navigation
+// ---------------------------------------------------------------------------
+
+/// Return the nearest **named** sibling that immediately precedes `node`
+/// within `parent`'s named-children list.
+///
+/// Scans `parent`'s named children in order and returns the one seen just
+/// before `node` is encountered. Returns `None` when `node` is the first
+/// named child or is not a named child of `parent`.
+///
+/// This is useful when the cursor sits on a node that is preceded by the
+/// receiver expression, e.g. an ERROR node whose prior named sibling is the
+/// object being accessed.
+///
+/// # Example
+///
+/// ```rust
+/// use tree_sitter_utils::traversal::preceding_named_sibling;
+/// // let receiver = preceding_named_sibling(error_node, parent);
+/// ```
+pub fn preceding_named_sibling<'tree>(
+    node: Node<'tree>,
+    parent: Node<'tree>,
+) -> Option<Node<'tree>> {
+    let mut walker = parent.walk();
+    let mut prev: Option<Node<'tree>> = None;
+    for child in parent.named_children(&mut walker) {
+        if child.id() == node.id() {
+            return prev;
+        }
+        prev = Some(child);
+    }
+    None
+}
+
+// ---------------------------------------------------------------------------
+// Ancestry checks
+// ---------------------------------------------------------------------------
+
+/// Return `true` when `node` is `ancestor` itself or any of its descendants.
+///
+/// Walks the parent chain of `node` upward; returns `true` as soon as a node
+/// with the same id as `ancestor` is found. Returns `false` when the root is
+/// reached without a match.
+///
+/// Note: matching on id is safe within a single tree — tree-sitter guarantees
+/// unique ids per node per tree.
+///
+/// # Example
+///
+/// ```rust
+/// use tree_sitter_utils::traversal::is_descendant_of;
+/// // assert!(is_descendant_of(leaf, subtree_root));
+/// ```
+pub fn is_descendant_of(node: Node<'_>, ancestor: Node<'_>) -> bool {
+    let mut cur = node;
+    loop {
+        if cur.id() == ancestor.id() {
+            return true;
+        }
+        match cur.parent() {
+            Some(p) => cur = p,
+            None => return false,
+        }
+    }
+}
+
 /// Walk the subtree rooted at `root` and return the innermost node whose kind
 /// equals `kind` and whose byte span contains `offset`.
 ///
